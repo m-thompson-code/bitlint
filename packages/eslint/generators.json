@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "name": "eslint",
+  "version": "0.0.1",
+  "generators": {
+    "eslint": {
+      "factory": "./src/generators/eslint/generator",
+      "schema": "./src/generators/eslint/schema.json",
+      "description": "eslint generator"
+    }
+  }
+}
