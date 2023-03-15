@@ -9,6 +9,7 @@ import {
 } from '@nrwl/devkit';
 import * as path from 'path';
 import { EslintGeneratorSchema } from './schema';
+import initGenerator from '../init/generator';
 
 interface NormalizedSchema extends EslintGeneratorSchema {
   projectName: string;
@@ -56,6 +57,8 @@ function addFiles(tree: Tree, options: NormalizedSchema) {
 }
 
 export default async function (tree: Tree, options: EslintGeneratorSchema) {
+  await initGenerator(tree, options);
+
   const normalizedOptions = normalizeOptions(tree, options);
   addProjectConfiguration(tree, normalizedOptions.projectName, {
     root: normalizedOptions.projectRoot,

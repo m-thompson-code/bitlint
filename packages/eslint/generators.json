@@ -7,6 +7,11 @@
       "factory": "./src/generators/eslint/generator",
       "schema": "./src/generators/eslint/schema.json",
       "description": "eslint generator"
+    },
+    "init": {
+      "factory": "./src/generators/init/generator",
+      "schema": "./src/generators/init/schema.json",
+      "description": "Installs eslint-related dependencies"
     }
   }
 }

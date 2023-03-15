@@ -6,6 +6,8 @@ import {
   uniq,
 } from '@nrwl/nx-plugin/testing';
 
+const TIMEOUT = 120_000;
+
 describe('eslint e2e', () => {
   // Setting up individual workspaces per
   // test can cause e2e runs to take a long time.
@@ -28,7 +30,7 @@ describe('eslint e2e', () => {
     await runNxCommandAsync(`generate @bitovi/eslint:eslint ${project}`);
     const result = await runNxCommandAsync(`build ${project}`);
     expect(result.stdout).toContain('Executor ran');
-  }, 120000);
+  }, TIMEOUT);
 
   describe('--directory', () => {
     it('should create src in the specified directory', async () => {
@@ -39,7 +41,7 @@ describe('eslint e2e', () => {
       expect(() =>
         checkFilesExist(`libs/subdir/${project}/src/index.ts`)
       ).not.toThrow();
-    }, 120000);
+    }, TIMEOUT);
   });
 
   describe('--tags', () => {
@@ -51,6 +53,6 @@ describe('eslint e2e', () => {
       );
       const project = readJson(`libs/${projectName}/project.json`);
       expect(project.tags).toEqual(['e2etag', 'e2ePackage']);
-    }, 120000);
+    }, TIMEOUT);
   });
 });

@@ -22,6 +22,11 @@
     "directory": {
       "type": "string",
       "description": "A directory where the project is placed"
+    },
+    "skipPackageJson": {
+      "type": "boolean",
+      "default": false,
+      "description": "Do not add dependencies to `package.json`."
     }
   },
   "required": ["name"]

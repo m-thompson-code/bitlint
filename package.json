@@ -2,7 +2,10 @@
   "name": "bitovi",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "test": "nx test eslint",
+    "e2e": "nx e2e eslint-e2e"
+  },
   "private": true,
   "devDependencies": {
     "@nrwl/devkit": "15.8.6",
