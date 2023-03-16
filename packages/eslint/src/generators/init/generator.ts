@@ -8,7 +8,11 @@ import { InitGeneratorSchema as Schema } from './schema';
 function updateDependencies(host: Tree) {
   removeDependenciesFromPackageJson(
     host,
-    ['@bitovi/eslint', '@bitovi/eslint-plugin-nx-glue'],
+    [
+      '@angular-eslint/utils',
+      '@bitovi/eslint',
+      '@bitovi/eslint-plugin-nx-glue'
+    ],
     []
   );
 
@@ -16,6 +20,7 @@ function updateDependencies(host: Tree) {
     host,
     {},
     {
+      ['@angular-eslint/utils']: '~15.0.0',
       ['@bitovi/eslint']: '^1.0.0',
       ['@bitovi/eslint-plugin-nx-glue']: '^1.0.0'
     }

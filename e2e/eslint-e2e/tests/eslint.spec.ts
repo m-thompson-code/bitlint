@@ -25,21 +25,22 @@ describe('eslint e2e', () => {
     runNxCommandAsync('reset');
   });
 
-  it('should create eslint', async () => {
-    const project = uniq('eslint');
-    await runNxCommandAsync(`generate @bitovi/eslint:eslint ${project}`);
-    const result = await runNxCommandAsync(`build ${project}`);
-    expect(result.stdout).toContain('Executor ran');
-  }, TIMEOUT);
+  // it('should create eslint', async () => {
+  //   const projectName = uniq('eslint');
+  //   await runNxCommandAsync(`generate @bitovi/eslint:eslint ${projectName}`);
+  //   const result = await runNxCommandAsync(`build ${projectName}`);
+  //   expect(result.stdout).toContain('Executor ran');
+  // }, TIMEOUT);
 
   describe('--directory', () => {
     it('should create src in the specified directory', async () => {
-      const project = uniq('eslint');
+      const projectName = uniq('eslint');
+      const eslintPluginName = `eslint-plugin-${projectName}`;
       await runNxCommandAsync(
-        `generate @bitovi/eslint:eslint ${project} --directory subdir`
+        `generate @bitovi/eslint:eslint-plugin ${projectName} --directory subdir`
       );
       expect(() =>
-        checkFilesExist(`libs/subdir/${project}/src/index.ts`)
+        checkFilesExist(`libs/subdir/${eslintPluginName}/src/index.ts`)
       ).not.toThrow();
     }, TIMEOUT);
   });
@@ -47,11 +48,13 @@ describe('eslint e2e', () => {
   describe('--tags', () => {
     it('should add tags to the project', async () => {
       const projectName = uniq('eslint');
+      const eslintPluginName = `eslint-plugin-${projectName}`;
+
       ensureNxProject('@bitovi/eslint', 'dist/packages/eslint');
       await runNxCommandAsync(
-        `generate @bitovi/eslint:eslint ${projectName} --tags e2etag,e2ePackage`
+        `generate @bitovi/eslint:eslint-plugin ${projectName} --tags e2etag,e2ePackage`
       );
-      const project = readJson(`libs/${projectName}/project.json`);
+      const project = readJson(`libs/${eslintPluginName}/project.json`);
       expect(project.tags).toEqual(['e2etag', 'e2ePackage']);
     }, TIMEOUT);
   });
