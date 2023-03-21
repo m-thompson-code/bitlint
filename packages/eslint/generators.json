@@ -3,20 +3,24 @@
   "name": "eslint",
   "version": "0.0.1",
   "generators": {
-    "eslint": {
-      "factory": "./src/generators/eslint/generator",
-      "schema": "./src/generators/eslint/schema.json",
-      "description": "eslint generator"
-    },
     "init": {
       "factory": "./src/generators/init/generator",
       "schema": "./src/generators/init/schema.json",
-      "description": "Installs eslint-related dependencies"
+      "description": "Installs eslint-related dependencies",
+      "aliases": ["ng-add"],
+      "hidden": true
     },
     "eslint-plugin": {
       "factory": "./src/generators/eslint-plugin/generator",
       "schema": "./src/generators/eslint-plugin/schema.json",
+      "aliases": ["lib"],
+      "x-type": "library",
       "description": "Generate an eslint-plugin that exports eslint rules"
+    },
+    "rule": {
+      "factory": "./src/generators/rule/generator",
+      "schema": "./src/generators/rule/schema.json",
+      "description": "Generate custom eslint rule for an existing eslint plugin."
     }
   }
 }

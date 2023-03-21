@@ -16,7 +16,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@bitovi/eslint": ["packages/eslint/src/index.ts"]
+      "@bitovi/eslint": ["packages/eslint/src/index.ts"],
     }
   },
   "exclude": ["node_modules", "tmp"]

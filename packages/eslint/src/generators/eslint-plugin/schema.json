@@ -56,21 +56,18 @@
     "publishable": {
       "type": "boolean",
       "description": "Create a publishable library.",
-      "default": true,
-      "x-priority": "important"
+      "default": true
     },
     "buildable": {
       "type": "boolean",
       "default": true,
-      "description": "Generate a buildable library.",
-      "x-priority": "important"
+      "description": "Generate a buildable library."
     },
     "compiler": {
       "type": "string",
       "enum": ["tsc", "swc"],
       "default": "tsc",
-      "description": "The compiler used by the build and test targets.",
-      "x-priority": "important"
+      "description": "The compiler used by the build and test targets."
     },
     "importPath": {
       "type": "string",
@@ -118,5 +115,6 @@
       "description": "Whether or not to configure the ESLint `parserOptions.project`. We do not do this by default for lint performance reasons.",
       "default": false
     }
-  }
+  },
+  "required": ["name"]
 }

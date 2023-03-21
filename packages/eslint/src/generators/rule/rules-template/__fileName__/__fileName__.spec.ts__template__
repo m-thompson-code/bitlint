@@ -1,0 +1,24 @@
+import { ESLintUtils } from '@typescript-eslint/utils';
+import { convertAnnotatedSourceToFailureCase } from '@angular-eslint/utils';
+import { MessageIds, rule, RULE_NAME } from './<%= fileName %>';
+
+const ruleTester = new ESLintUtils.RuleTester({
+  parser: '@typescript-eslint/parser',
+});
+
+ruleTester.run<MessageIds, unknown[]>(RULE_NAME, rule, {
+  valid: [{
+    name: 'should pass for true',
+    code: 'const IS_TRUE = true;',
+  }],
+  invalid: [
+    convertAnnotatedSourceToFailureCase({
+      description: 'should fail for false',
+      annotatedSource: `
+      const IS_TRUE = false;
+                      ~~~~~
+      `,
+      messageId: 'placeholder',
+    }),
+  ],
+});

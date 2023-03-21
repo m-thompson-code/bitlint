@@ -1,4 +1,4 @@
 {
   "eslint.validate": ["json"],
-  "jestrunner.configPath": "e2e/eslint-e2e/jest.config.ts"
+  "jestrunner.configPath": "tmp/nx-e2e/proj/libs/eslint-plugin-eslint6199734/jest.config.ts"
 }

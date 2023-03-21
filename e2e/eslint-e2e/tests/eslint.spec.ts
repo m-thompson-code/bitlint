@@ -15,9 +15,9 @@ describe('eslint e2e', () => {
   // consumes 1 workspace. The tests should each operate
   // on a unique project in the workspace, such that they
   // are not dependant on one another.
-  beforeAll(() => {
-    ensureNxProject('@bitovi/eslint', 'dist/packages/eslint');
-  });
+  // beforeAll(() => {
+  //   ensureNxProject('@bitovi/eslint', 'dist/packages/eslint');
+  // });
 
   afterAll(() => {
     // `nx reset` kills the daemon, and performs
@@ -35,12 +35,13 @@ describe('eslint e2e', () => {
   describe('--directory', () => {
     it('should create src in the specified directory', async () => {
       const projectName = uniq('eslint');
-      const eslintPluginName = `eslint-plugin-${projectName}`;
+
       await runNxCommandAsync(
-        `generate @bitovi/eslint:eslint-plugin ${projectName} --directory subdir`
+        `generate @bitovi/eslint:eslint-plugin ${projectName} --directory subdir`, { silenceError: false }
       );
+
       expect(() =>
-        checkFilesExist(`libs/subdir/${eslintPluginName}/src/index.ts`)
+        checkFilesExist(`libs/subdir/${projectName}/src/index.ts`)
       ).not.toThrow();
     }, TIMEOUT);
   });
@@ -48,14 +49,30 @@ describe('eslint e2e', () => {
   describe('--tags', () => {
     it('should add tags to the project', async () => {
       const projectName = uniq('eslint');
-      const eslintPluginName = `eslint-plugin-${projectName}`;
 
       ensureNxProject('@bitovi/eslint', 'dist/packages/eslint');
       await runNxCommandAsync(
         `generate @bitovi/eslint:eslint-plugin ${projectName} --tags e2etag,e2ePackage`
       );
-      const project = readJson(`libs/${eslintPluginName}/project.json`);
+      const project = readJson(`libs/${projectName}/project.json`);
       expect(project.tags).toEqual(['e2etag', 'e2ePackage']);
+    }, TIMEOUT);
+  });
+
+  describe('build', () => {
+    it('should create publishable build', async () => {
+      const projectName = uniq('eslint');
+
+      ensureNxProject('@bitovi/eslint', 'dist/packages/eslint');
+      await runNxCommandAsync(
+        `generate @bitovi/eslint:eslint-plugin ${projectName}`
+      );
+
+      await runNxCommandAsync(
+        `build ${projectName}`
+      );
+
+      expect(true).toEqual(true);
     }, TIMEOUT);
   });
 });

@@ -2,11 +2,11 @@ import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing';
 import { Tree, readProjectConfiguration } from '@nrwl/devkit';
 
 import generator from './generator';
-import { EslintPluginGeneratorSchema } from './schema';
+import { RuleGeneratorSchema } from './schema';
 
-describe('eslint-plugin generator', () => {
+describe('rule generator', () => {
   let appTree: Tree;
-  const options: EslintPluginGeneratorSchema = { name: 'test', compiler: 'tsc' };
+  const options: RuleGeneratorSchema = { projectName: 'some-project', ruleName: 'some-rule' };
 
   beforeEach(() => {
     appTree = createTreeWithEmptyWorkspace({layout: 'apps-libs'});

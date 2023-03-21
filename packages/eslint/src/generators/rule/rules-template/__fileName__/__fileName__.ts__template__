@@ -1,0 +1,55 @@
+/**
+ * This file sets you up with structure needed for an ESLint rule.
+ *
+ * It leverages utilities from @typescript-eslint to allow TypeScript to
+ * provide autocompletions etc for the configuration.
+ *
+ * Your rule's custom logic will live within the create() method below
+ * and you can learn more about writing ESLint rules on the official guide:
+ *
+ * https://eslint.org/docs/developer-guide/working-with-rules
+ *
+ * You can also view many examples of existing rules here:
+ *
+ * https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin/src/rules
+ */
+
+import { ESLintUtils, TSESTree, AST_NODE_TYPES, ASTUtils } from '@typescript-eslint/utils';
+// TODO: clean up "eslint-plugin" from projectName
+// NOTE: The rule will be available in ESLint configs as "@bitovi/nx-glue/<%= projectName %>/<%= fileName %>"
+export const RULE_NAME = '<%= fileName %>';
+
+export type Options = [];
+export type MessageIds = 'placeholder';
+
+export const rule = ESLintUtils.RuleCreator(() => __filename)<Options, MessageIds>({
+  name: RULE_NAME,
+  meta: {
+    type: 'problem',
+    docs: {
+      description: `The truth will set you free.`,
+      recommended: 'error',
+    },
+    schema: [],
+    messages: {
+      placeholder: `This example requires no values to be 'false'`,
+    },
+  },
+  defaultOptions: [],
+  create(context) {
+    return {
+      'VariableDeclaration': function(node: TSESTree.VariableDeclaration) {
+        node.declarations.forEach((declaration) => {
+          const isLiteral = ASTUtils.isNodeOfType(AST_NODE_TYPES.Literal);
+
+          if (isLiteral(declaration.init) && declaration.init.value !== false) {
+            context.report({
+              node: declaration.init,
+              messageId: 'placeholder',
+            });
+          }
+        });
+      }
+    };
+  },
+});

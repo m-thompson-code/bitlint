@@ -1,23 +1,23 @@
 import {
-  addProjectConfiguration,
   formatFiles,
   generateFiles,
   getWorkspaceLayout,
   joinPathFragments,
   names,
   offsetFromRoot,
-  readProjectConfiguration,
   Tree,
-  ChangeType,
-  applyChangesToString,
+  updateJson,
 } from '@nrwl/devkit';
 import * as ts from 'typescript';
-// import { tsquery } from '@phenomnomnominal/tsquery';
-// import * as path from 'path';
 import { EslintPluginGeneratorSchema } from './schema';
 import { libraryGenerator } from '@nrwl/node';
+import { updateContentOfObjectLiteralExpression } from '../../helpers/update-content-of-object-literal-expression';
+import init from '../init/generator';
+import ruleGenerator from '../rule/generator';
+import { addPluginToEslint } from '../../helpers/add-plugin-to-eslint-config';
 
 interface NormalizedSchema extends EslintPluginGeneratorSchema {
+  eslintPluginName: string;
   projectName: string;
   projectRoot: string;
   projectDirectory: string;
@@ -28,8 +28,9 @@ function normalizeOptions(
   tree: Tree,
   options: EslintPluginGeneratorSchema
 ): NormalizedSchema {
-  const name = names(`eslint-plugin-${options.name}`).fileName;
-  const importPath = options.importPath ?? name;
+  const name = names(options.name).fileName;
+  const eslintPluginName = getEslintPluginName(name);
+  const importPath = getEslintPluginName(options.importPath ?? name);
   const projectDirectory = options.directory
     ? `${names(options.directory).fileName}/${name}`
     : name;
@@ -42,6 +43,7 @@ function normalizeOptions(
   return {
     ...options,
     name,
+    eslintPluginName,
     importPath,
     projectName,
     projectRoot,
@@ -60,15 +62,32 @@ function addFiles(tree: Tree, options: NormalizedSchema) {
 
   // Clean up node generated lib directory
   tree.delete(joinPathFragments(options.projectRoot, 'src/lib'));
-
   updateGlueConfig(tree, options);
+  updatePackageJson(tree, options);
+  addPluginToEslint(tree, '@bitovi/nx-glue');
+
   generateFiles(
     tree,
     joinPathFragments(__dirname, 'index-template'),
     options.projectRoot,
     templateOptions
   );
-  addRule(tree, options, 'my-rule');
+}
+
+function updatePackageJson(tree: Tree, options: NormalizedSchema): void {
+  const path = joinPathFragments(options.projectRoot, 'package.json');
+  if (!tree.exists(path)) {
+    return;
+  }
+
+  updateJson(tree, path, (json) => ({
+    ...json,
+    // main: './src/index.js',// already included by default
+    // "types": "./src/index.d.ts"// already included by default
+    peerDependencies: {
+      eslint: ">=8",
+    },
+  }));
 }
 
 function updateGlueConfig(tree: Tree, options: NormalizedSchema) {
@@ -77,7 +96,7 @@ function updateGlueConfig(tree: Tree, options: NormalizedSchema) {
     tree.write(configPath, 'module.exports = {};');
   }
 
-  const content = getAppendedContentToObjectLiteralExpression(
+  const content = updateContentOfObjectLiteralExpression(
     tree,
     configPath,
     findModuleExports,
@@ -90,51 +109,6 @@ function updateGlueConfig(tree: Tree, options: NormalizedSchema) {
   );
 
   tree.write(configPath, content);
-}
-
-function addRule(tree: Tree, options: NormalizedSchema, ruleName: string) {
-  const { fileName, propertyName } = names(ruleName);
-  const ruleNameSymbol = `${propertyName}Name`;
-
-  const templateOptions = {
-    ...options,
-    fileName, propertyName,
-    offsetFromRoot: offsetFromRoot(options.projectRoot),
-    template: '',
-    ruleNameSymbol,
-  };
-
-  generateFiles(
-    tree,
-    joinPathFragments(__dirname, 'rules-template'),
-    options.projectRoot,
-    templateOptions
-  );
-
-  const indexPath = joinPathFragments(options.projectRoot, 'src', 'index.ts');
-
-  const original = tree.read(indexPath, 'utf-8') ?? '';
-
-  const contentWithImports = applyChangesToString(original, [
-    {
-      type: ChangeType.Insert,
-      index: 0,
-      text: `import { RULE_NAME as ${ruleNameSymbol}, rule as ${propertyName} } from './${
-        options.directory ? `${options.directory}/` : 'rules/'
-      }${fileName}';\n`,
-    },
-  ]);
-
-  tree.write(indexPath, contentWithImports);
-
-  const updatedExportsChange = getAppendedContentToObjectLiteralExpression(
-    tree,
-    indexPath,
-    findRulesObjectLiteralExpression,
-    `[${ruleNameSymbol}]: ${propertyName}`
-  );
-
-  tree.write(indexPath, updatedExportsChange);
 }
 
 function findModuleExports(
@@ -169,92 +143,38 @@ function findModuleExports(
   return right;
 }
 
-function findRulesObjectLiteralExpression(
-  node: ts.Node
-): ts.ObjectLiteralExpression | undefined {
-  if (
-    ts.isPropertyAssignment(node) &&
-    ts.isIdentifier(node.name) &&
-    node.name.text === 'rules' &&
-    ts.isObjectLiteralExpression(node.initializer)
-  ) {
-    return node.initializer;
-  }
-
-  return node.forEachChild(findRulesObjectLiteralExpression);
-}
-
-function getAppendedContentToObjectLiteralExpression(
-  tree: Tree,
-  filePath: string,
-  finder: (node: ts.Node) => ts.ObjectLiteralExpression | undefined,
-  insertedContent: string
-): string {
-  /**
-   * Import the new rule into the workspace plugin index.ts and
-   * register it ready for use in .eslintrc.json configs.
-   */
-  const content = tree.read(filePath, 'utf-8');
-
-  if (!content) {
-    return '';
-  }
-
-  const sourceFile = ts.createSourceFile(
-    filePath,
-    content,
-    ts.ScriptTarget.Latest,
-    true
-  );
-
-  const node = sourceFile.forEachChild((node) => finder(node));
-
-  if (!node) {
-    // failed to find node, so return existing text as is
-    return content;
-  }
-
-  /**
-   * If the rules object already has entries, we need to make sure our insertion
-   * takes commas into account.
-   */
-  let leadingComma = '';
-  if (node.properties.length > 0) {
-    if (!node.properties.hasTrailingComma) {
-      leadingComma = ',';
-    }
-  }
-
-  const newContents = applyChangesToString(content, [
-    {
-      type: ChangeType.Insert,
-      index: node.getEnd() - 1,
-      text: `${leadingComma}${insertedContent}\n`,
-    },
-  ]);
-
-  return newContents;
-}
-
 export default async function (
   tree: Tree,
   options: EslintPluginGeneratorSchema
 ) {
-  console.log(options);
-
-  // await formatFiles(tree);
-  // name: string;// eslint-plugin-${name}
-  // options.linter = options.linter ?? true;
-  // options.buildable = options.buildable ?? true;
-  // options.publishable = options.publishable ?? true;
-  // options.testEnvironment = options.testEnvironment ?? 'node';
-  // options.strict = options.strict ?? true;
-
   const normalizedOptions = normalizeOptions(tree, options);
 
-  await libraryGenerator(tree, normalizedOptions);
+  await init(tree, { ...normalizedOptions, skipFormat: true });
+
+  await libraryGenerator(tree, { ...normalizedOptions, skipFormat: true });
 
   addFiles(tree, normalizedOptions);
 
+  await ruleGenerator(tree, {
+    projectName: normalizedOptions.projectName,
+    ruleName: 'my-rule',
+    skipDependencies: true,
+    skipFormat: true
+  });
+
   await formatFiles(tree);
+}
+
+function getEslintPluginName(name: string): string {
+  const [first, second] = name.split('/');
+
+  if (second) {
+    return `${first}/${getEslintPluginName(second)}`;
+  }
+
+  if (name.startsWith('eslint-plugin')) {
+    return name;
+  }
+
+  return `eslint-plugin-${name}`;
 }

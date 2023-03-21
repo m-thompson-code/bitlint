@@ -9,6 +9,11 @@
       "type": "boolean",
       "default": false,
       "description": "Do not add dependencies to `package.json`."
+    },
+    "skipFormat": {
+      "description": "Skip formatting files.",
+      "type": "boolean",
+      "default": false
     }
   }
 }
