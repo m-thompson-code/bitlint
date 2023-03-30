@@ -1,1 +1,6 @@
-export interface DocGenExecutorSchema {} // eslint-disable-line
+export interface DocGenExecutorSchema {
+  inputPath: string;
+  outputPath: string;
+  tsconfigPath: string;
+  verbose?: boolean;
+}

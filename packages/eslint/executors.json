@@ -5,6 +5,11 @@
       "implementation": "./src/executors/doc-gen/executor",
       "schema": "./src/executors/doc-gen/schema.json",
       "description": "Generates documentation for rules."
+    },
+    "build": {
+      "implementation": "./src/executors/build/executor",
+      "schema": "./src/executors/build/schema.json",
+      "description": "build executor"
     }
   }
 }

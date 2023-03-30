@@ -15,8 +15,11 @@
  */
 
 import { ESLintUtils, TSESTree, AST_NODE_TYPES, ASTUtils } from '@typescript-eslint/utils';
+
+<% if(projectName) { %>
 // TODO: clean up "eslint-plugin" from projectName
 // NOTE: The rule will be available in ESLint configs as "@bitovi/nx-glue/<%= projectName %>/<%= fileName %>"
+<% } // end else block %>
 export const RULE_NAME = '<%= fileName %>';
 
 export type Options = [];
@@ -42,7 +45,7 @@ export const rule = ESLintUtils.RuleCreator(() => __filename)<Options, MessageId
         node.declarations.forEach((declaration) => {
           const isLiteral = ASTUtils.isNodeOfType(AST_NODE_TYPES.Literal);
 
-          if (isLiteral(declaration.init) && declaration.init.value !== false) {
+          if (isLiteral(declaration.init) && declaration.init.value === false) {
             context.report({
               node: declaration.init,
               messageId: 'placeholder',

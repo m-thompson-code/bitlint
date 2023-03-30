@@ -1,5 +1,6 @@
 export interface RuleGeneratorSchema {
-    projectName: string;
+    projectName?: string;
+    sourceRoot?: string;
     ruleName: string;
     directory?: string;
     skipFormat?: boolean;

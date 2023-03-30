@@ -13,6 +13,10 @@ export const eslintConfigFileWhitelist = [
 
 // export const baseEsLintConfigFile = '.eslintrc.base.json';
 
+/**
+ * @deprecated currently not needed since eslint path is set in generator options
+ * This idea can be useful though in the future when we want to detect their eslint
+ */
 export function addPluginToEslint(tree: Tree, plugin: string, directoryPath = ''): boolean {
   for (const file of eslintConfigFileWhitelist) {
     const path = joinPathFragments(directoryPath, file);
@@ -26,7 +30,7 @@ export function addPluginToEslint(tree: Tree, plugin: string, directoryPath = ''
   return false;
 }
 
-function addPluginToJson(tree: Tree, plugin: string, jsonPath: string): void {
+export function addPluginToJson(tree: Tree, plugin: string, jsonPath: string): void {
   updateJson(tree, jsonPath, (json) => {
     const plugins = json.plugins ?? [];
 

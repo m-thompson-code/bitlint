@@ -1,15 +1,17 @@
 /**
- * Import your custom workspace rules at the top of this file.
+ * Import your custom eslint rules at the top of this file.
  *
  * For example:
- *
+ * // TODO: update path in example
  * import { RULE_NAME as myCustomRuleName, rule as myCustomRule } from './rules/my-custom-rule';
  *
  * In order to quickly get started with writing rules you can use the
  * following generator command and provide your desired rule name:
  *
+ * TODO: update this command based on how index.ts was generated
+ * TODO: update this to be the actual command with project name
  * ```sh
- * npx nx g @nrwl/linter:workspace-rule {{ NEW_RULE_NAME }}
+ * npx nx g @bitovi/eslint:rule {{ NEW_RULE_NAME }}
  * ```
  */
 

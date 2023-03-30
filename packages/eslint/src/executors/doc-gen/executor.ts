@@ -1,3 +1,6 @@
+import { ExecutorContext } from '@nrwl/devkit';
+import { join } from 'path';
+import { generateDocsForRules } from './doc-gen';
 import { DocGenExecutorSchema } from './schema';
 
 // export interface CucumberExecutorOptions extends DocGenExecutorSchema {
@@ -8,14 +11,35 @@ import { DocGenExecutorSchema } from './schema';
 
 export default async function runExecutor(
   options: DocGenExecutorSchema,
+  context: ExecutorContext
 ) {
-  // let success = false;
+  // console.log('Executor ran for DocGen', options);
 
-  console.log('Executor ran for DocGen', options);
+  try {
+    const input = join(context.root, options.inputPath);
+    const output = join(context.root, options.outputPath);
+    const tsconfig = join(context.root, options.tsconfigPath);
+    // console.log(options, input, output, tsconfig);
 
-  return {
-    success: true,
-  };
+    await generateDocsForRules(
+      input,
+      output,
+      tsconfig,
+      options.verbose
+    );
+
+    console.log('Generated documentation successfully!');
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error('Documentation generation failed:', error);
+
+    return {
+      success: false,
+    };
+  }
 }
 
 // function normalizeOptions(

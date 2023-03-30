@@ -9,31 +9,41 @@ import {
   applyChangesToString,
 } from '@nrwl/devkit';
 import init from '../init/generator';
-import { updateContentOfObjectLiteralExpression } from '../../helpers/update-content-of-object-literal-expression';
+import { updateContentOfObjectLiteralExpression } from '../utils/update-content-of-object-literal-expression';
 import { RuleGeneratorSchema } from './schema';
 import * as ts from 'typescript';
+import { getRelativePath } from '../../utils/get-relative-path';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface NormalizedSchema extends RuleGeneratorSchema {
   directory: string;
+  sourceRoot: string;
+  projectName: string | undefined;// Required for optional properties used in templates
+}
+
+function getSourceRoot(tree: Tree, options: RuleGeneratorSchema): string {
+  const { sourceRoot, projectName } = options;
+
+  if (projectName) {
+    const projectConfig = readProjectConfiguration(tree, projectName);
+
+    if (projectConfig.sourceRoot) {
+      return projectConfig.sourceRoot;
+    }
+  }
+
+  return sourceRoot ?? '';
 }
 
 function normalizeOptions(tree: Tree, options: RuleGeneratorSchema): NormalizedSchema {
-
   return {
     ...options,
+    sourceRoot: getSourceRoot(tree, options),
     directory: options.directory ?? 'rules',
+    projectName: options.projectName
   };
 }
 
 function addRule(tree: Tree, options: NormalizedSchema) {
-  const projectConfig = readProjectConfiguration(tree, options.projectName);
-  const sourceRoot = projectConfig.sourceRoot;
-
-  if (!sourceRoot) {
-    throw new Error("Unexpected project configuration is missing sourceRoot");
-  }
-
   const { fileName, propertyName } = names(options.ruleName);
   const ruleNameSymbol = `${propertyName}Name`;
 
@@ -47,17 +57,19 @@ function addRule(tree: Tree, options: NormalizedSchema) {
   generateFiles(
     tree,
     joinPathFragments(__dirname, 'rules-template'),
-    joinPathFragments(sourceRoot, options.directory),
+    joinPathFragments(options.sourceRoot, options.directory),
     templateOptions
   );
 
-  const indexPath = joinPathFragments(sourceRoot, 'index.ts');
+  const indexPath = joinPathFragments(options.sourceRoot, 'index.ts');
 
   const original = tree.read(indexPath, 'utf-8') ?? '';
 
-  const importPath = toRelativePath(joinPathFragments(options.directory, fileName, fileName));
+  const contentWithRulesExport = ensureRulesExport(indexPath, original);
 
-  const contentWithImports = applyChangesToString(original, [
+  const importPath = getRelativePath('', joinPathFragments(options.directory, fileName, fileName));
+
+  const contentWithImports = applyChangesToString(contentWithRulesExport, [
     {
       type: ChangeType.Insert,
       index: 0,
@@ -77,6 +89,29 @@ function addRule(tree: Tree, options: NormalizedSchema) {
   tree.write(indexPath, updatedExportsChange);
 }
 
+function ensureRulesExport(filePath: string, content: string): string {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    content,
+    ts.ScriptTarget.Latest,
+    true
+  );
+
+  const rulesExport = sourceFile.forEachChild((node) => findRulesObjectLiteralExpression(node));
+
+  if (rulesExport) {
+    return content;
+  }
+
+  return applyChangesToString(content, [
+    {
+      type: ChangeType.Insert,
+      index: content.length,
+      text: `\nmodule.exports = { rules: {} };\n`,
+    },
+  ]);
+}
+
 function findRulesObjectLiteralExpression(
   node: ts.Node
 ): ts.ObjectLiteralExpression | undefined {
@@ -92,22 +127,14 @@ function findRulesObjectLiteralExpression(
   return node.forEachChild(findRulesObjectLiteralExpression);
 }
 
-function toRelativePath(path: string): string {
-  if (path.startsWith('.')) {
-    return path;
-  }
-
-  return `./${path}`;
-}
-
 export default async function (tree: Tree, options: RuleGeneratorSchema) {
   const normalizedOptions = normalizeOptions(tree, options);
 
   if (!normalizedOptions.skipDependencies) {
-    await init(tree, { skipFormat: true });
+    await init(tree, { ...normalizedOptions, skipFormat: true });
   }
 
-  addRule(tree, normalizedOptions);
+  addRule(tree, { ...normalizedOptions });
 
   if (!normalizedOptions.skipFormat) {
     await formatFiles(tree);

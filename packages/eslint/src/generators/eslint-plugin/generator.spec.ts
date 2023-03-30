@@ -6,7 +6,7 @@ import { EslintPluginGeneratorSchema } from './schema';
 
 describe('eslint-plugin generator', () => {
   let appTree: Tree;
-  const options: EslintPluginGeneratorSchema = { name: 'test', compiler: 'tsc' };
+  const options: EslintPluginGeneratorSchema = { name: 'test' };
 
   beforeEach(() => {
     appTree = createTreeWithEmptyWorkspace({layout: 'apps-libs'});

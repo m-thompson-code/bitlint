@@ -5,6 +5,24 @@
   "title": "DocGen executor",
   "description": "",
   "type": "object",
-  "properties": {},
-  "required": []
+  "properties": {
+    "inputPath": {
+      "type": "string",
+      "description": "Path to rules relative from the root of the workspace."
+    },
+    "outputPath": {
+      "type": "string",
+      "description": "Path to generated docs relative from the root of the workspace."
+    },
+    "tsconfigPath": {
+      "type": "string",
+      "description": "Path to tsconfig relative from the root of the workspace."
+    },
+    "verbose": {
+      "type": "boolean",
+      "description": "Show console logs",
+      "default": true
+    }
+  },
+  "required": ["inputPath", "outputPath"]
 }

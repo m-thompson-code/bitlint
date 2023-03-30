@@ -46,6 +46,7 @@ export function updateContentOfObjectLiteralExpression(
     {
       type: ChangeType.Insert,
       index: node.getEnd() - 1,
+      // TODO: optionally avoid adding newline if it isn't needed
       text: `${leadingComma}${insertedContent}\n`,
     },
   ]);

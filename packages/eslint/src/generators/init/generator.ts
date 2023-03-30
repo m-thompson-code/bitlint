@@ -6,8 +6,9 @@ import {
   Tree,
 } from '@nrwl/devkit';
 
-import { getNxVersion } from '../../helpers/get-nx-version';
-import { initGenerator } from '@nrwl/node';
+import { getNxVersion } from '../../utils/get-nx-version';
+import { initGenerator } from '@nrwl/js';
+import { jestInitGenerator } from '@nrwl/jest';
 import { lintInitGenerator } from '@nrwl/linter';
 import { InitGeneratorSchema as Schema } from './schema';
 
@@ -16,10 +17,12 @@ function updateDependencies(host: Tree) {
     host,
     [
       '@nrwl/linter',
-      '@nrwl/node',
+      '@nrwl/js',
+      '@nrwl/jest',
       '@angular-eslint/utils',
-      '@bitovi/eslint',
+      // '@bitovi/eslint',
       '@bitovi/eslint-plugin-nx-glue',
+      'glob',
     ],
     []
   );
@@ -29,10 +32,12 @@ function updateDependencies(host: Tree) {
     {},
     {
       ['@nrwl/linter']: getNxVersion(),
-      ['@nrwl/node']: getNxVersion(),
+      ['@nrwl/js']: getNxVersion(),
+      ['@nrwl/jest']: getNxVersion(),
       ['@angular-eslint/utils']: '~15.0.0',
-      ['@bitovi/eslint']: '^1.0.0',
-      ['@bitovi/eslint-plugin-nx-glue']: '^1.0.0',
+      // ['@bitovi/eslint']: '^1.0.0',
+      ['@bitovi/eslint-plugin-nx-glue']: '^1.2.0',
+      ['glob']: '^9.3.1',
     }
   );
 }
@@ -43,15 +48,22 @@ export default async function (tree: Tree, options: Schema) {
   tasks.push(
     await initGenerator(tree, {
       ...options,
-      unitTestRunner: 'jest',
       skipFormat: true,
+      tsConfigName: 'tsconfig.base.json'
+      // tsConfigName: schema.rootProject ? 'tsconfig.json' : 'tsconfig.base.json',
     })
   );
 
-  tasks.push(await lintInitGenerator(tree, { ...options }));
+  // if (options.unitTestRunner === 'jest') {
+    tasks.push(
+      await jestInitGenerator(tree, { ...options, testEnvironment: 'node' })
+    );
+  // }
+
+  tasks.push(lintInitGenerator(tree, { ...options }));
 
   if (!options.skipPackageJson) {
-    tasks.push(await updateDependencies(tree));
+    tasks.push(updateDependencies(tree));
   }
 
   if (!options.skipFormat) {
@@ -63,7 +75,7 @@ export default async function (tree: Tree, options: Schema) {
 
 /**
  * Run tasks in serial
- *
+ * TODO: link to source code
  * @param tasks The tasks to run in serial.
  */
 export function runTasksInSerial(

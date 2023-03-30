@@ -1,8 +1,11 @@
-import { Schema } from "@nrwl/node/src/generators/library/schema";
-
-export interface EslintPluginGeneratorSchema extends Schema {
-    // name: string;
-    // tags?: string;
-    // directory?: string;
-    temp?: boolean;
+export interface EslintPluginGeneratorSchema {
+  name: string;
+  tags?: string;
+  directory?: string;
+  skipDependencies?: boolean;
+  skipNxProject?: boolean;
+  jestPreset?: string;
+  rootEslintConfig?: string;
+  baseTsConfig?: string;
+  skipPlaceholderRule?: boolean;
 }

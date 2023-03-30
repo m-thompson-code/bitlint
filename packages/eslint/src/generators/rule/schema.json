@@ -7,7 +7,7 @@
   "properties": {
     "projectName": {
       "type": "string",
-      "description": "The name of the frontend project to test.",
+      "description": "The name of the frontend project to test. (You can leave blank if you fill in 'sourceRoot')",
       "$default": {
         "$source": "projectName"
       },
@@ -36,7 +36,11 @@
       "description": "Skip initializing dependencies.",
       "type": "boolean",
       "default": false
+    },
+    "sourceRoot": {
+      "type": "string",
+      "description": "Path to source of eslint plugin (optional if you provide 'projectName')"
     }
   },
-  "required": ["projectName", "ruleName"]
+  "required": ["ruleName"]
 }

@@ -7,13 +7,17 @@
       "factory": "./src/generators/init/generator",
       "schema": "./src/generators/init/schema.json",
       "description": "Installs eslint-related dependencies",
-      "aliases": ["ng-add"],
+      "aliases": [
+        "ng-add"
+      ],
       "hidden": true
     },
     "eslint-plugin": {
       "factory": "./src/generators/eslint-plugin/generator",
       "schema": "./src/generators/eslint-plugin/schema.json",
-      "aliases": ["lib"],
+      "aliases": [
+        "lib"
+      ],
       "x-type": "library",
       "description": "Generate an eslint-plugin that exports eslint rules"
     },

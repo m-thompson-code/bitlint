@@ -1,180 +1,144 @@
 import {
+  addProjectConfiguration,
   formatFiles,
   generateFiles,
-  getWorkspaceLayout,
   joinPathFragments,
   names,
-  offsetFromRoot,
   Tree,
-  updateJson,
 } from '@nrwl/devkit';
-import * as ts from 'typescript';
-import { EslintPluginGeneratorSchema } from './schema';
-import { libraryGenerator } from '@nrwl/node';
-import { updateContentOfObjectLiteralExpression } from '../../helpers/update-content-of-object-literal-expression';
-import init from '../init/generator';
+import { join } from 'path';
+import { EslintPluginGeneratorSchema as Schema } from './schema';
 import ruleGenerator from '../rule/generator';
-import { addPluginToEslint } from '../../helpers/add-plugin-to-eslint-config';
+import { createGlueConfig } from './utils/create-glue-config';
+import init from '../init/generator';
+import { NormalizedSchema, normalizeOptions } from './normalized-schema';
+import { createJestConfig } from './utils/create-jest-config';
+import { createBabelConfig } from './utils/create-babel-config';
+import { createEslintConfig } from './utils/create-eslint-config';
+import { createTsConfig } from './utils/create-ts-config';
 
-interface NormalizedSchema extends EslintPluginGeneratorSchema {
-  eslintPluginName: string;
-  projectName: string;
-  projectRoot: string;
-  projectDirectory: string;
-  parsedTags: string[];
-}
-
-function normalizeOptions(
-  tree: Tree,
-  options: EslintPluginGeneratorSchema
-): NormalizedSchema {
-  const name = names(options.name).fileName;
-  const eslintPluginName = getEslintPluginName(name);
-  const importPath = getEslintPluginName(options.importPath ?? name);
-  const projectDirectory = options.directory
-    ? `${names(options.directory).fileName}/${name}`
-    : name;
-  const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-');
-  const projectRoot = `${getWorkspaceLayout(tree).libsDir}/${projectDirectory}`;
-  const parsedTags = options.tags
-    ? options.tags.split(',').map((s) => s.trim())
-    : [];
-
-  return {
-    ...options,
-    name,
-    eslintPluginName,
-    importPath,
-    projectName,
-    projectRoot,
-    projectDirectory,
-    parsedTags,
-  };
-}
-
-function addFiles(tree: Tree, options: NormalizedSchema) {
+function addTemplateFiles(tree: Tree, options: NormalizedSchema) {
   const templateOptions = {
     ...options,
     ...names(options.name),
-    offsetFromRoot: offsetFromRoot(options.projectRoot),
     template: '',
   };
-
-  // Clean up node generated lib directory
-  tree.delete(joinPathFragments(options.projectRoot, 'src/lib'));
-  updateGlueConfig(tree, options);
-  updatePackageJson(tree, options);
-  addPluginToEslint(tree, '@bitovi/nx-glue');
-
   generateFiles(
     tree,
-    joinPathFragments(__dirname, 'index-template'),
+    join(__dirname, 'files/index-template'),
+    options.sourceRoot,
+    templateOptions
+  );
+  generateFiles(
+    tree,
+    join(__dirname, 'files/root-template'),
     options.projectRoot,
     templateOptions
   );
 }
 
-function updatePackageJson(tree: Tree, options: NormalizedSchema): void {
-  const path = joinPathFragments(options.projectRoot, 'package.json');
-  if (!tree.exists(path)) {
-    return;
-  }
-
-  updateJson(tree, path, (json) => ({
-    ...json,
-    // main: './src/index.js',// already included by default
-    // "types": "./src/index.d.ts"// already included by default
-    peerDependencies: {
-      eslint: ">=8",
+function createNxProjectConfiguration(tree: Tree, options: NormalizedSchema): void {
+  addProjectConfiguration(tree, options.projectName, {
+    root: options.projectRoot,
+    projectType: 'library',
+    sourceRoot: options.sourceRoot,
+    targets: {
+      build: {
+        executor: '@nrwl/js:tsc',
+        outputs: ['{options.outputPath}'],
+        options: {
+          outputPath: joinPathFragments('dist', options.projectRoot),
+          tsConfig: joinPathFragments(
+            options.projectRoot,
+            'tsconfig.lint.json'
+          ),
+          packageJson: joinPathFragments(
+            options.projectRoot,
+            'package.json'
+          ),
+          main: joinPathFragments(options.sourceRoot, 'index.ts'),
+          assets: [joinPathFragments(options.projectRoot, '*.md')],
+        },
+      },
+      lint: {
+        executor: '@nrwl/linter:eslint',
+        outputs: ['{options.outputFile}'],
+        options: {
+          lintFilePatterns: [
+            joinPathFragments(options.projectRoot, '**/*.ts'),
+          ],
+        },
+      },
+      test: {
+        executor: '@nrwl/jest:jest',
+        outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
+        options: {
+          jestConfig: joinPathFragments(
+            options.projectRoot,
+            'jest.config.ts'
+          ),
+          passWithNoTests: true,
+        },
+        configurations: {
+          ci: {
+            ci: true,
+            codeCoverage: true,
+          },
+        },
+      },
+      doc: {
+        executor: '@bitovi/eslint:doc-gen',
+        inputs: ['!{projectRoot}/src/**/*.md', 'default', '^production'],
+        // TODO: update cache settings for this executor
+        // TODO: inputs: ['!{projectRoot}/src/docs/**/*', 'default', '^production'],
+        outputs: ['{options.outputPath}'],
+        options: {
+          inputPath: joinPathFragments(options.sourceRoot, 'rules'),
+          outputPath: joinPathFragments(options.sourceRoot, 'docs'),
+          tsconfigPath: joinPathFragments(
+            options.projectRoot,
+            'tsconfig.lint.json'
+          ),
+        },
+      },
     },
-  }));
-}
-
-function updateGlueConfig(tree: Tree, options: NormalizedSchema) {
-  const configPath = 'eslint-plugin-glue.config.js';
-  if (!tree.exists(configPath)) {
-    tree.write(configPath, 'module.exports = {};');
-  }
-
-  const content = updateContentOfObjectLiteralExpression(
-    tree,
-    configPath,
-    findModuleExports,
-    `
-  '${options.name}': {
-    dir: '${options.projectRoot}',
-    tsconfig: 'tsconfig.lib.json',
-  },
-  `
-  );
-
-  tree.write(configPath, content);
-}
-
-function findModuleExports(
-  node: ts.Node
-): ts.ObjectLiteralExpression | undefined {
-  if (!ts.isBinaryExpression(node)) {
-    return node.forEachChild(findModuleExports);
-  }
-
-  const { left, right } = node;
-
-  if (!ts.isObjectLiteralExpression(right)) {
-    return node.forEachChild(findModuleExports);
-  }
-
-  if (!ts.isPropertyAccessExpression(left)) {
-    return node.forEachChild(findModuleExports);
-  }
-
-  const moduleIdentifer = left.expression;
-
-  if (!ts.isIdentifier(moduleIdentifer) || moduleIdentifer.text !== 'module') {
-    return node.forEachChild(findModuleExports);
-  }
-
-  const exportsIdentifier = left.name;
-
-  if (exportsIdentifier.text !== 'exports') {
-    return node.forEachChild(findModuleExports);
-  }
-
-  return right;
+    tags: options.parsedTags,
+  });
 }
 
 export default async function (
   tree: Tree,
-  options: EslintPluginGeneratorSchema
+  options: Schema
 ) {
   const normalizedOptions = normalizeOptions(tree, options);
 
-  await init(tree, { ...normalizedOptions, skipFormat: true });
+  if (!normalizedOptions.skipDependencies) {
+    await init(tree, { ...normalizedOptions, skipFormat: true });
+  }
 
-  await libraryGenerator(tree, { ...normalizedOptions, skipFormat: true });
+  createJestConfig(tree, normalizedOptions);
 
-  addFiles(tree, normalizedOptions);
+  createEslintConfig(tree, normalizedOptions);
 
-  await ruleGenerator(tree, {
-    projectName: normalizedOptions.projectName,
-    ruleName: 'my-rule',
-    skipDependencies: true,
-    skipFormat: true
-  });
+  createTsConfig(tree, normalizedOptions);
+
+  createGlueConfig(tree, normalizedOptions);
+
+  if (!normalizedOptions.skipNxProject) {
+    createNxProjectConfiguration(tree, normalizedOptions);
+    createBabelConfig(tree, normalizedOptions);
+  }
+
+  addTemplateFiles(tree, normalizedOptions);
+
+  if (normalizedOptions.skipPlaceholderRule) {
+    await ruleGenerator(tree, {
+      projectName: normalizedOptions.projectName,
+      ruleName: 'my-rule',
+      skipDependencies: true,
+      skipFormat: true,
+    });
+  }
 
   await formatFiles(tree);
-}
-
-function getEslintPluginName(name: string): string {
-  const [first, second] = name.split('/');
-
-  if (second) {
-    return `${first}/${getEslintPluginName(second)}`;
-  }
-
-  if (name.startsWith('eslint-plugin')) {
-    return name;
-  }
-
-  return `eslint-plugin-${name}`;
 }
