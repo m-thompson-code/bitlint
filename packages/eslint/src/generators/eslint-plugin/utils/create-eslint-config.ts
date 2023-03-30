@@ -1,6 +1,6 @@
 import { joinPathFragments, Tree, writeJson } from "@nrwl/devkit";
 import { getRelativePath } from "../../../utils/get-relative-path";
-import { NormalizedSchema } from "../normalized-schema";
+import { NormalizedSchema } from "./normalized-schema";
 
 interface EslintConfig {
   root?: boolean;

@@ -5,3 +5,6 @@
 5. Investigate install script <-- dunno ugh PASS
 
 6. Create separate templates for rules - Progress
+
+
+.eslintignore for linting file

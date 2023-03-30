@@ -2,7 +2,7 @@ import { joinPathFragments, Tree } from '@nrwl/devkit';
 import * as nxPreset from '@nrwl/jest/preset';
 import type { Config } from 'jest';
 import { getRelativePath } from '../../../utils/get-relative-path';
-import { NormalizedSchema } from '../normalized-schema';
+import { NormalizedSchema } from './normalized-schema';
 
 interface JestConfigOptions {
   displayName: string;

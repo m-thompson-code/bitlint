@@ -1,7 +1,7 @@
 import { generateFiles, joinPathFragments, Tree, updateJson } from "@nrwl/devkit";
 import { getRelativePath } from "../../../utils/get-relative-path";
 import { join } from "path";
-import { NormalizedSchema } from "../normalized-schema";
+import { NormalizedSchema } from "./normalized-schema";
 
 interface TsConfig {
   extends?: string;

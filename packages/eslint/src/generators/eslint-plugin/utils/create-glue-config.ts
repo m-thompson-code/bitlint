@@ -1,5 +1,5 @@
 import { joinPathFragments, Tree } from '@nrwl/devkit';
-import { NormalizedSchema } from '../normalized-schema';
+import { NormalizedSchema } from './normalized-schema';
 import { updateGlueConfig } from '../../utils/update-glue-config';
 import { addPluginToJson } from '../../utils/add-plugin-to-eslint-config';
 

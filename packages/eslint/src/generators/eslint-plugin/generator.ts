@@ -1,41 +1,15 @@
 import {
   addProjectConfiguration,
   formatFiles,
-  generateFiles,
   joinPathFragments,
-  names,
   Tree,
 } from '@nrwl/devkit';
-import { join } from 'path';
 import { EslintPluginGeneratorSchema as Schema } from './schema';
 import ruleGenerator from '../rule/generator';
-import { createGlueConfig } from './utils/create-glue-config';
 import init from '../init/generator';
-import { NormalizedSchema, normalizeOptions } from './normalized-schema';
-import { createJestConfig } from './utils/create-jest-config';
+import { NormalizedSchema, normalizeOptions } from './utils/normalized-schema';
 import { createBabelConfig } from './utils/create-babel-config';
 import { createEslintConfig } from './utils/create-eslint-config';
-import { createTsConfig } from './utils/create-ts-config';
-
-function addTemplateFiles(tree: Tree, options: NormalizedSchema) {
-  const templateOptions = {
-    ...options,
-    ...names(options.name),
-    template: '',
-  };
-  generateFiles(
-    tree,
-    join(__dirname, 'files/index-template'),
-    options.sourceRoot,
-    templateOptions
-  );
-  generateFiles(
-    tree,
-    join(__dirname, 'files/root-template'),
-    options.projectRoot,
-    templateOptions
-  );
-}
 
 function createNxProjectConfiguration(tree: Tree, options: NormalizedSchema): void {
   addProjectConfiguration(tree, options.projectName, {
@@ -115,21 +89,10 @@ export default async function (
   if (!normalizedOptions.skipDependencies) {
     await init(tree, { ...normalizedOptions, skipFormat: true });
   }
-
-  createJestConfig(tree, normalizedOptions);
-
-  createEslintConfig(tree, normalizedOptions);
-
-  createTsConfig(tree, normalizedOptions);
-
-  createGlueConfig(tree, normalizedOptions);
-
   if (!normalizedOptions.skipNxProject) {
     createNxProjectConfiguration(tree, normalizedOptions);
     createBabelConfig(tree, normalizedOptions);
   }
-
-  addTemplateFiles(tree, normalizedOptions);
 
   if (normalizedOptions.skipPlaceholderRule) {
     await ruleGenerator(tree, {
@@ -140,5 +103,9 @@ export default async function (
     });
   }
 
-  await formatFiles(tree);
+  await createEslintConfig(tree, { ...normalizedOptions, skipFormat: true });
+
+  if (normalizedOptions.skipFormat) {
+    await formatFiles(tree);
+  }
 }

@@ -25,6 +25,16 @@
       "factory": "./src/generators/rule/generator",
       "schema": "./src/generators/rule/schema.json",
       "description": "Generate custom eslint rule for an existing eslint plugin."
+    },
+    "standalone-eslint-plugin": {
+      "factory": "./src/generators/standalone-eslint-plugin/generator",
+      "schema": "./src/generators/standalone-eslint-plugin/schema.json",
+      "description": "Test"
+    },
+    "standalone-rule": {
+      "factory": "./src/generators/standalone-rule/generator",
+      "schema": "./src/generators/standalone-rule/schema.json",
+      "description": "Standlone wrapper for rule generator"
     }
   }
 }

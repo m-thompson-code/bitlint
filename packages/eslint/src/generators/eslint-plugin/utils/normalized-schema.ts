@@ -1,6 +1,6 @@
 import { getWorkspaceLayout, names, offsetFromRoot, Tree } from '@nrwl/devkit';
-import { getEslintPluginName } from '../../utils/get-eslint-plugin-name';
-import { EslintPluginGeneratorSchema as Schema } from './schema';
+import { getEslintPluginName } from '../../../utils/get-eslint-plugin-name';
+import { EslintPluginGeneratorSchema as Schema } from '../schema';
 
 export interface NormalizedSchema extends Schema {
   eslintPluginName: string;
@@ -14,6 +14,7 @@ export interface NormalizedSchema extends Schema {
   sourceRoot: string;
   // projectDirectory: string;
   parsedTags: string[];
+  skipFormat: boolean;
 }
 
 function getNxProjectDefaultOptions(options: NormalizedSchema): NormalizedSchema {
@@ -62,6 +63,7 @@ export function normalizeOptions(
     sourceRoot: `${projectRoot}/src`,
     offsetFromRoot: offsetFromRoot(projectRoot),
     parsedTags,
+    skipFormat: options.skipFormat ?? false,
   };
 
   if (!skipNxProject) {

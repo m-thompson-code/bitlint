@@ -1,4 +1,4 @@
-export interface EslintPluginGeneratorSchema {
+export interface StandaloneEslintPluginGeneratorSchema {
   name: string;
   tags?: string;
   directory?: string;
