@@ -1,5 +1,5 @@
 {
-  "name": "nx-eslint-temp",
+  "name": "bitlint",
   "version": "0.0.31",
   "main": "src/index.js",
   "generators": "./generators.json",
