@@ -1,8 +1,8 @@
-export function getEslintPluginName(projectName: string): string {
+export function getESLintPluginName(projectName: string): string {
   const [first, second] = projectName.split('/');
 
   if (second) {
-    return `${first}/${getEslintPluginName(second)}`;
+    return `${first}/${getESLintPluginName(second)}`;
   }
 
   if (projectName.startsWith('eslint-plugin')) {

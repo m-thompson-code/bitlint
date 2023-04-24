@@ -1,46 +1,91 @@
-// import { commandsObject } from 'nx/src/command-line/nx-commands';
-// import { logger } from 'nx/src/utils/logger';
+import { logger, workspaceRoot } from '@nrwl/devkit';
+import { join } from 'path';
+import * as yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import { generateDocs } from '../generate-docs';
+import { getErrorMessage } from '../utils/get-error-message';
+import { getGeneratorOptions } from './get-generator-options';
+import { getInfoOverride } from './logger-info';
+import { getGeneratorHandler } from './get-generator-handler';
+import { DocOptions, getDocOptions } from './get-doc-options';
 
-// const oldInfo = logger.info;
-// logger.info = function (...args) {
-//   const message = args[0];
+logger.info = getInfoOverride(logger.info);
 
-//   if (message.startsWith('NX Generating')) {
-//     return logger.info('NX did some stuff with the power of NX ~moo~ :D');
-//   }
+export const parserConfiguration: Partial<yargs.ParserConfigurationOptions> = {
+  'strip-dashed': true,
+};
 
-//   return oldInfo(...args);
-// };
+export function main() {
+  try {
+    // Ensure that the output takes up the available width of the terminal.
+    yargs.wrap(yargs.terminalWidth());
 
-// export function main() {
-//   try {
-//     const args = getParsableArgs(process.argv.slice(2));
-//     commandsObject.parse(args);
-//   } catch (e) {
-//     logError(e);
-//     process.exit(1);
-//   }
-// }
+    // Remove node paths from argv
+    const args = hideBin(process.argv);
 
-// function getParsableArgs(args: string[]): string[] {
-//   const command = args[0];
+    yargs(args)
+      .parserConfiguration(parserConfiguration)
+      .demandCommand(1, '')
+      .command({
+        command: 'init [_..]',
+        describe: 'Installs dependencies',
+        aliases: ['i'],
+        builder: (yargs) =>
+          getGeneratorOptions(
+            yargs,
+            '../generators/standalone-init/schema.json'
+          ),
+        handler: getGeneratorHandler('nx-eslint-temp:standalone-init'),
+      })
+      .command({
+        command: 'doc [_..]',
+        describe: 'Generate docs',
+        aliases: ['d'],
+        builder: (yargs) => getDocOptions(yargs),
+        handler: async (argv) => {
+          console.log('doc -> argv', args);
 
-//   switch (command) {
-//     case 'rule':
-//       // return ['g', 'nx-eslint-temp:standalone-rule', args.slice(1)];
-//       return ['g', 'nx-eslint-temp:rule', ...args.slice(1)];
-//     case 'plugin':
-//       return ['g', 'nx-eslint-temp:standalone-eslint-plugin', ...args.slice(1)];
-//     case 'eslint-plugin':
-//       return ['g', 'nx-eslint-temp:standalone-eslint-plugin', ...args.slice(1)];
-//     default:
-//       throw new Error('Unexpected command');
-//   }
-// }
+          const { input, output, tsconfig, verbose } =
+            argv as yargs.ArgumentsCamelCase<DocOptions>;
 
-// function logError(error: unknown): void {
-//   if (error instanceof Error) {
-//       console.error(error.message);
-//     }
-//     console.error(error);
-// }
+          await generateDocs(
+            join(workspaceRoot, input),
+            output === '<input>/docs'
+              ? join(workspaceRoot, input, 'docs')
+              : join(workspaceRoot, output),
+            tsconfig ? join(workspaceRoot, tsconfig) : undefined,
+            verbose
+          );
+        },
+      })
+      .command({
+        command: 'rule [ruleName] [_..]',
+        describe: 'Generate rules',
+        aliases: ['r'],
+        builder: (yargs) =>
+          getGeneratorOptions(
+            yargs,
+            '../generators/standalone-rule/schema.json',
+            'ruleName'
+          ),
+        handler: getGeneratorHandler('nx-eslint-temp:standalone-rule'),
+      })
+      .command({
+        command: 'plugin [pluginName] [_..]',
+        describe: 'Generate plugin',
+        aliases: ['p'],
+        builder: (yargs) =>
+          getGeneratorOptions(
+            yargs,
+            '../generators/standalone-eslint-plugin/schema.json',
+            'pluginName'
+          ),
+        handler: getGeneratorHandler('nx-eslint-temp:standalone-eslint-plugin'),
+      })
+      .scriptName('bitlint')
+      .parse();
+  } catch (e) {
+    console.error(getErrorMessage(e));
+    process.exit(1);
+  }
+}

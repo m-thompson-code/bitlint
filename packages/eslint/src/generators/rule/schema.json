@@ -42,5 +42,5 @@
       "description": "Path to source of eslint plugin (optional if you provide 'projectName')"
     }
   },
-  "required": ["ruleName"]
+  "required": ["projectName", "ruleName"]
 }

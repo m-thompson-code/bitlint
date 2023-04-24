@@ -13,6 +13,7 @@ interface TsConfig {
 export function createTsConfig(tree: Tree, options: NormalizedSchema): void {
   const templateOptions = {
     ...options,
+    tsConfigDist: getRelativePath('dist/out-tsc', options.projectRoot),
     template: '',
   };
 

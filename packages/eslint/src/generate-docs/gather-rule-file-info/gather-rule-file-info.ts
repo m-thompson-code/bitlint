@@ -1,5 +1,7 @@
 import { globSync } from 'glob';
 import { join } from 'path';
+import { getFilename } from './get-filename';
+import { getBaseName } from './get-basename';
 
 /**
  * Collection of rule's filename, full path to its rule and spec file.
@@ -31,7 +33,7 @@ export interface GlobInfo {
  * @param sourcePath Directory to scrape for rules
  * @returns array of RuleFileInfo objects, which indicate the path to the rule's code and spec files
  */
-export function gatherRuleFileInfoByGlob(sourcePath: string): RuleFileInfo[] {
+export function gatherRuleFileInfo(sourcePath: string): RuleFileInfo[] {
   const files: GlobInfo[] = globSync(join(sourcePath, '**/*.ts'), { ignore: 'node_modules/**' })
   .map(filepath => {
     const filename = getFilename(filepath);
@@ -86,27 +88,4 @@ export function gatherRuleFileInfoByGlob(sourcePath: string): RuleFileInfo[] {
 
       return ruleFileInfo;
     });
-}
-
-/**
- * Strips filename from filepath:
- *
- * `full/path/to/file.ts` -> `file.ts`
- */
-function getFilename(path: string) {
-  const parts = path.split('/');
-
-  return parts[parts.length - 1];
-}
-
-function getBaseName(path: string) {
-  const filename = getFilename(path);
-  const parts = filename.split('.');
-
-  if (parts.length > 1) {
-    // Remove extension
-    parts.pop();
-  }
-
-  return parts.join('.');
 }

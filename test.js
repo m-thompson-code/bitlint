@@ -8,6 +8,7 @@ console.log(relative('/app/other', 'app/sub/dir'));
 console.log(relative('app/sub/dir', 'app/other'));
 console.log(relative('app/sub/dir', 'app'));
 console.log(relative('app/sub/dir', ''));
+console.log(relative('app/sub/dir', 'app/sub/dir/another-sub/dir'));
 
 // function toRelativePath(path: string): string {
 //   if (path.startsWith('.')) {

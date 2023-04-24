@@ -1,14 +1,20 @@
 {
-  "name": "eslint",
-  "version": "0.0.7",
+  "name": "nx-eslint-temp",
+  "version": "0.0.31",
   "main": "src/index.js",
   "generators": "./generators.json",
   "executors": "./executors.json",
   "dependencies": {
-    "nx": "*",
-    "@nrwl/devkit": "*",
-    "@nrwl/js": "*",
-    "@nrwl/jest": "*",
-    "@nrwl/linter": "*"
+    "nx": "^15.8.6",
+    "@nrwl/devkit": "^15.8.6",
+    "glob": "^9.3.1",
+    "yargs": "^17.6.2",
+    "prettier": "^2.6.2",
+    "@nrwl/jest": "^15.8.6",
+    "ts-node": "^10.9.1",
+    "semver": "^7.3.4"
+  },
+  "bin": {
+    "bitlint": "./bin/bitlint.js"
   }
 }

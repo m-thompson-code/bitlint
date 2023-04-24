@@ -1,18 +1,14 @@
 import { getWorkspaceLayout, names, offsetFromRoot, Tree } from '@nrwl/devkit';
-import { getEslintPluginName } from '../../../utils/get-eslint-plugin-name';
+import { getESLintPluginName } from '../../../utils/get-eslint-plugin-name';
 import { EslintPluginGeneratorSchema as Schema } from '../schema';
 
 export interface NormalizedSchema extends Schema {
   eslintPluginName: string;
   skipDependencies: boolean;
   offsetFromRoot: string;
-  skipNxProject: boolean;
-  skipPlaceholderRule: boolean;
-  //
   projectName: string;
   projectRoot: string;
   sourceRoot: string;
-  // projectDirectory: string;
   parsedTags: string[];
   skipFormat: boolean;
 }
@@ -26,27 +22,26 @@ function getNxProjectDefaultOptions(options: NormalizedSchema): NormalizedSchema
   };
 }
 
-function getProjectRoot(tree: Tree, projectDirectory: string, skipNxProject: boolean) {
-  if (skipNxProject) {
-    return projectDirectory;
+function getProjectRoot(tree: Tree, projectName: string, directory: string, isNxProject: boolean) {
+  if (isNxProject) {
+    const projectDirectory = directory
+    ? `${names(directory).fileName}/${projectName}`
+    : projectName;
+
+    return `${getWorkspaceLayout(tree).libsDir}/${projectDirectory}`;
   }
 
-  return `${getWorkspaceLayout(tree).libsDir}/${projectDirectory}`;
+  return directory ? names(directory).fileName : '';
 }
 
 export function normalizeOptions(
   tree: Tree,
-  options: Schema
+  options: Schema,
+  isNxProject: boolean
 ): NormalizedSchema {
-  const skipNxProject = options.skipNxProject ?? false;
+  const projectName = names(options.pluginName).fileName;
 
-  const name = names(options.name).fileName;
-
-  const projectDirectory = options.directory
-    ? `${names(options.directory).fileName}/${name}`
-    : name;
-  const projectRoot = getProjectRoot(tree, projectDirectory, skipNxProject);
-  const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-');
+  const projectRoot = getProjectRoot(tree, projectName, options.directory ?? '', isNxProject);
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
@@ -54,10 +49,8 @@ export function normalizeOptions(
 
   const normalizedOptions = {
     ...options,
-    eslintPluginName: getEslintPluginName(projectName),
+    eslintPluginName: getESLintPluginName(projectName),
     skipDependencies: options.skipDependencies ?? false,
-    skipNxProject,
-    skipPlaceholderRule: options.skipDependencies ?? false,
     projectName,
     projectRoot,
     sourceRoot: `${projectRoot}/src`,
@@ -66,7 +59,7 @@ export function normalizeOptions(
     skipFormat: options.skipFormat ?? false,
   };
 
-  if (!skipNxProject) {
+  if (isNxProject) {
     return getNxProjectDefaultOptions(normalizedOptions);
   }
 

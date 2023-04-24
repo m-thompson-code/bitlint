@@ -22,6 +22,8 @@ export function createJestConfig(tree: Tree, options: NormalizedSchema): void {
     return;
   }
 
+  // TOOD: output looks weird with properties being wrapped with quotes like json
+  // should look normal =/
   tree.write(
     path,
     `/* eslint-disable */\nexport default ${JSON.stringify(
@@ -59,7 +61,7 @@ function getPresetConfig(options: JestPresetConfigOptions): Config {
 }
 
 function getRootConfig(options: JestConfigOptions): Config {
-  const { ...rest } = nxPreset as Config;
+  const { ...rest } = nxPreset.default as Config;
 
   if ('displayName' in rest) {
     delete rest.displayName;

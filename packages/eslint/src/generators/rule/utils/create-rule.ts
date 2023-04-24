@@ -3,9 +3,16 @@ import { getRelativePath } from "../../../utils/get-relative-path";
 import { updateContentOfObjectLiteralExpression } from "../../utils/update-content-of-object-literal-expression";
 import { ensureRulesExport } from "./ensure-rules-exports";
 import { findRulesObjectLiteralExpression } from "./find-rules-object-literal-expression";
-import { NormalizedSchema } from "./normalized-schema";
+import { dirname } from "path";
 
-export function createRule(tree: Tree, options: NormalizedSchema) {
+interface CreateRulesOptions {
+  ruleName: string;
+  directory: string;
+  index: string;
+  projectName: string | null;
+}
+
+export function createRule(tree: Tree, options: CreateRulesOptions) {
   const { fileName, propertyName } = names(options.ruleName);
   const ruleNameSymbol = `${propertyName}Name`;
 
@@ -19,17 +26,15 @@ export function createRule(tree: Tree, options: NormalizedSchema) {
   generateFiles(
     tree,
     joinPathFragments(__dirname, '../files/rules-template'),
-    joinPathFragments(options.sourceRoot, options.directory),
+    options.directory,
     templateOptions
   );
 
-  const indexPath = joinPathFragments(options.sourceRoot, 'index.ts');
+  const original = readIndex(tree, options.index);// tree.read(options.index, 'utf-8') ?? '';
 
-  const original = tree.read(indexPath, 'utf-8') ?? '';
+  const contentWithRulesExport = ensureRulesExport(options.index, original);
 
-  const contentWithRulesExport = ensureRulesExport(indexPath, original);
-
-  const importPath = getRelativePath('', joinPathFragments(options.directory, fileName, fileName));
+  const importPath = getRelativePath(dirname(options.index), joinPathFragments(options.directory, fileName, fileName));
 
   const contentWithImports = applyChangesToString(contentWithRulesExport, [
     {
@@ -39,14 +44,22 @@ export function createRule(tree: Tree, options: NormalizedSchema) {
     },
   ]);
 
-  tree.write(indexPath, contentWithImports);
+  tree.write(options.index, contentWithImports);
 
   const updatedExportsChange = updateContentOfObjectLiteralExpression(
     tree,
-    indexPath,
+    options.index,
     findRulesObjectLiteralExpression,
     `[${ruleNameSymbol}]: ${propertyName}`
   );
 
-  tree.write(indexPath, updatedExportsChange);
+  tree.write(options.index, updatedExportsChange);
+}
+
+function readIndex(tree: Tree, path: string): string {
+  if (!tree.exists(path)) {
+    return '';
+  }
+
+  return tree.read(path, 'utf-8') ?? '';
 }

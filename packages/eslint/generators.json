@@ -29,12 +29,20 @@
     "standalone-eslint-plugin": {
       "factory": "./src/generators/standalone-eslint-plugin/generator",
       "schema": "./src/generators/standalone-eslint-plugin/schema.json",
-      "description": "Test"
+      "description": "Test",
+      "hidden": true
     },
     "standalone-rule": {
       "factory": "./src/generators/standalone-rule/generator",
       "schema": "./src/generators/standalone-rule/schema.json",
-      "description": "Standlone wrapper for rule generator"
+      "description": "Standlone wrapper for rule generator",
+      "hidden": true
+    },
+    "standalone-init": {
+      "factory": "./src/generators/standalone-init/generator",
+      "schema": "./src/generators/standalone-init/schema.json",
+      "description": "standalone-init generator",
+      "hidden": true
     }
   }
 }

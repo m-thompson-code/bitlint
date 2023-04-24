@@ -5,50 +5,25 @@
   "title": "",
   "type": "object",
   "properties": {
-    "name": {
+    "ruleName": {
       "type": "string",
-      "description": "",
+      "description": "The name of the new rule.",
       "$default": {
         "$source": "argv",
         "index": 0
-      },
-      "x-prompt": "What name would you like to use?"
-    },
-    "tags": {
-      "type": "string",
-      "description": "Add tags to the project (used for linting)",
-      "alias": "t"
+      }
     },
     "directory": {
       "type": "string",
-      "description": "A directory where the project is placed"
+      "description": "Create the rule under this directory within `tools/eslint-rules/` (can be nested).",
+      "alias": "dir",
+      "default": "rules"
     },
-    "skipNxProject": {
-      "type": "boolean",
-      "description": "Skip generating Nx project configuration",
-      "default": false
-    },
-    "jestPreset": {
+    "index": {
       "type": "string",
-      "description": "Path to jest preset configuration"
-    },
-    "rootEslintConfig": {
-      "type": "string",
-      "description": "Path to root eslint configuration"
-    },
-    "baseTsConfig": {
-      "type": "string",
-      "description": "Path to base TypeScript configuration"
-    },
-    "skipDependencies": {
-      "description": "Skip initializing dependencies",
-      "type": "boolean",
-      "default": false
-    },
-    "skipPlaceholderRule": {
-      "description": "Skip creating placeholder eslint rule",
-      "type": "boolean",
-      "default": false
+      "description": "path to rules exports",
+      "alias": "i",
+      "default": "index.ts"
     },
     "skipFormat": {
       "description": "Skip formatting files.",
@@ -56,5 +31,5 @@
       "default": false
     }
   },
-  "required": ["name"]
+  "required": ["ruleName"]
 }

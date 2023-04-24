@@ -4,9 +4,9 @@ import {
   GeneratorCallback,
   removeDependenciesFromPackageJson,
   Tree,
+  NX_VERSION
 } from '@nrwl/devkit';
 
-import { getNxVersion } from '../../utils/get-nx-version';
 import { initGenerator } from '@nrwl/js';
 import { jestInitGenerator } from '@nrwl/jest';
 import { lintInitGenerator } from '@nrwl/linter';
@@ -20,8 +20,9 @@ function updateDependencies(host: Tree) {
       '@nrwl/js',
       '@nrwl/jest',
       '@angular-eslint/utils',
-      // '@bitovi/eslint',
-      '@bitovi/eslint-plugin-nx-glue',
+      // '@bitovi/eslint',// TODO
+      // '@bitovi/eslint-plugin-glue',// TODO
+      'eslint-plugin-glue',
       'glob',
     ],
     []
@@ -31,12 +32,13 @@ function updateDependencies(host: Tree) {
     host,
     {},
     {
-      ['@nrwl/linter']: getNxVersion(),
-      ['@nrwl/js']: getNxVersion(),
-      ['@nrwl/jest']: getNxVersion(),
+      ['@nrwl/linter']: NX_VERSION,
+      ['@nrwl/js']: NX_VERSION,
+      ['@nrwl/jest']: NX_VERSION,
       ['@angular-eslint/utils']: '~15.0.0',
       // ['@bitovi/eslint']: '^1.0.0',
-      ['@bitovi/eslint-plugin-nx-glue']: '^1.2.0',
+      // ['@bitovi/eslint-plugin-glue']: '^1.0.0',
+      ['eslint-plugin-glue']: '^0.3.0',
       ['glob']: '^9.3.1',
     }
   );
@@ -50,15 +52,12 @@ export default async function (tree: Tree, options: Schema) {
       ...options,
       skipFormat: true,
       tsConfigName: 'tsconfig.base.json'
-      // tsConfigName: schema.rootProject ? 'tsconfig.json' : 'tsconfig.base.json',
     })
   );
 
-  // if (options.unitTestRunner === 'jest') {
-    tasks.push(
-      await jestInitGenerator(tree, { ...options, testEnvironment: 'node' })
-    );
-  // }
+  tasks.push(
+    await jestInitGenerator(tree, { ...options, testEnvironment: 'node' })
+  );
 
   tasks.push(lintInitGenerator(tree, { ...options }));
 
@@ -87,11 +86,3 @@ export function runTasksInSerial(
     }
   };
 }
-
-// https://stackoverflow.com/questions/13444064/typescript-conditional-module-import-export
-// async function importModule(moduleName: string): Promise<any>{
-//   console.log("importing ", moduleName);
-//   const importedModule = await import(moduleName);
-//   console.log("\timported ...");
-//   return importedModule;
-// }

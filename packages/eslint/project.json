@@ -12,7 +12,7 @@
         "main": "packages/eslint/src/index.ts",
         "tsConfig": "packages/eslint/tsconfig.lib.json",
         "assets": [
-          "packages/eslint/bin/bitovi.js",
+          "packages/eslint/bin/bitlint.js",
           "packages/eslint/*.md",
           {
             "input": "./packages/eslint/src",

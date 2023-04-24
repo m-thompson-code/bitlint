@@ -5,28 +5,18 @@
   "title": "",
   "type": "object",
   "properties": {
-    "name": {
+    "pluginName": {
       "type": "string",
-      "description": "",
+      "description": "eslint-plugin name",
       "$default": {
         "$source": "argv",
         "index": 0
       },
       "x-prompt": "What name would you like to use?"
     },
-    "tags": {
-      "type": "string",
-      "description": "Add tags to the project (used for linting)",
-      "alias": "t"
-    },
     "directory": {
       "type": "string",
       "description": "A directory where the project is placed"
-    },
-    "skipNxProject": {
-      "type": "boolean",
-      "description": "Skip generating Nx project configuration",
-      "default": false
     },
     "jestPreset": {
       "type": "string",
@@ -40,21 +30,11 @@
       "type": "string",
       "description": "Path to base TypeScript configuration"
     },
-    "skipDependencies": {
-      "description": "Skip initializing dependencies",
-      "type": "boolean",
-      "default": false
-    },
-    "skipPlaceholderRule": {
-      "description": "Skip creating placeholder eslint rule",
-      "type": "boolean",
-      "default": false
-    },
     "skipFormat": {
       "description": "Skip formatting files.",
       "type": "boolean",
       "default": false
     }
   },
-  "required": ["name"]
+  "required": ["pluginName"]
 }

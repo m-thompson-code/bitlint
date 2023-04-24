@@ -24,6 +24,7 @@ export function createEslintConfig(tree: Tree, options: NormalizedSchema): void 
     writeJson(tree, path, getConfig(getRelativePath(options.projectRoot, options.rootEslintConfig)));
   } else {
     writeJson(tree, path, getConfig());
+    // TODO: Create .eslintignore with node_modules if one doesn't exist already
   }
 }
 

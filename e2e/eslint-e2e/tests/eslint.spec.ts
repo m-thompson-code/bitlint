@@ -93,6 +93,10 @@ describe('eslint e2e', () => {
       );
 
       await runNxCommandAsync(
+        `generate @bitovi/eslint:rule my-rule --projectName=${projectName}`
+      );
+
+      await runNxCommandAsync(
         `build ${projectName}`
       );
 

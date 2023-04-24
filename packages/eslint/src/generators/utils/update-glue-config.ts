@@ -5,7 +5,7 @@ import { findModuleExports } from "./find-module-exports";
 interface GlueConfigOptions {
   projectName: string;
   tsconfig: string;
-  dir: string;
+  plugin: string;
 }
 
 export function updateGlueConfig(tree: Tree, options: GlueConfigOptions) {
@@ -21,7 +21,7 @@ export function updateGlueConfig(tree: Tree, options: GlueConfigOptions) {
     findModuleExports,
     `
   '${options.projectName}': {
-    dir: '${options.dir}',
+    plugin: '${options.plugin}',
     tsconfig: '${options.tsconfig}',
   },
   `

@@ -5,7 +5,7 @@ import { NormalizedSchema } from "./normalized-schema";
 export function createCoreFiles(tree: Tree, options: NormalizedSchema) {
   const templateOptions = {
     ...options,
-    ...names(options.name),
+    ...names(options.projectName),
     template: '',
   };
   generateFiles(
@@ -16,8 +16,10 @@ export function createCoreFiles(tree: Tree, options: NormalizedSchema) {
   );
   generateFiles(
     tree,
-    join(__dirname, '../files/root-template'),
-    options.projectRoot,
+    join(__dirname, '../files/core-template'),
+    // Only add README.md and package.json to root if
+    // not the root of the project
+    options.projectRoot || options.sourceRoot,
     templateOptions
   );
 }

@@ -5,9 +5,9 @@
   "title": "",
   "type": "object",
   "properties": {
-    "name": {
+    "pluginName": {
       "type": "string",
-      "description": "",
+      "description": "eslint-plugin name",
       "$default": {
         "$source": "argv",
         "index": 0
@@ -22,11 +22,6 @@
     "directory": {
       "type": "string",
       "description": "A directory where the project is placed"
-    },
-    "skipNxProject": {
-      "type": "boolean",
-      "description": "Skip generating Nx project configuration",
-      "default": false
     },
     "jestPreset": {
       "type": "string",
@@ -45,16 +40,11 @@
       "type": "boolean",
       "default": false
     },
-    "skipPlaceholderRule": {
-      "description": "Skip creating placeholder eslint rule",
-      "type": "boolean",
-      "default": false
-    },
     "skipFormat": {
       "description": "Skip formatting files.",
       "type": "boolean",
       "default": false
     }
   },
-  "required": ["name"]
+  "required": ["pluginName"]
 }

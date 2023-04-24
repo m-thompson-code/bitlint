@@ -1,7 +1,4 @@
-import {
-  formatFiles,
-  Tree,
-} from '@nrwl/devkit';
+import { formatFiles, Tree } from '@nrwl/devkit';
 import init from '../init/generator';
 import { RuleGeneratorSchema as Schema } from './schema';
 import { normalizeOptions } from './utils/normalized-schema';
@@ -14,7 +11,9 @@ export default async function (tree: Tree, options: Schema) {
     await init(tree, { ...normalizedOptions, skipFormat: true });
   }
 
-  createRule(tree, { ...normalizedOptions });
+  createRule(tree, {
+    ...normalizedOptions,
+  });
 
   if (!normalizedOptions.skipFormat) {
     await formatFiles(tree);

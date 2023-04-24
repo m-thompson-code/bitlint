@@ -1,18 +1,21 @@
 import { joinPathFragments, Tree } from '@nrwl/devkit';
 import { NormalizedSchema } from './normalized-schema';
 import { updateGlueConfig } from '../../utils/update-glue-config';
-import { addPluginToJson } from '../../utils/add-plugin-to-eslint-config';
+import { addPluginToESLintConfiguration } from '../../utils/add-plugin-to-eslint-configuration';
 
 export function createGlueConfig(tree: Tree, options: NormalizedSchema): void {
   updateGlueConfig(tree, {
-    dir: options.sourceRoot,
+    plugin: options.sourceRoot,
     tsconfig: joinPathFragments(options.projectRoot, 'tsconfig.lint.json'),
     projectName: options.projectName,
   });
 
+  // const gluePluginName = '@bitovi/glue';// TODO: publish to bitovi
+  const gluePluginName = 'glue';
+
   if (options.rootEslintConfig) {
-    addPluginToJson(tree, '@bitovi/nx-glue', options.rootEslintConfig);
+    addPluginToESLintConfiguration(tree, gluePluginName, options.rootEslintConfig);
   } else {
-    addPluginToJson(tree, '@bitovi/nx-glue', joinPathFragments(options.projectRoot, '.eslintrc.json'));
+    addPluginToESLintConfiguration(tree, gluePluginName, joinPathFragments(options.projectRoot, '.eslintrc.json'));
   }
 }

@@ -24,12 +24,14 @@ describe('init generator', () => {
     await generator(appTree, {});
     const packageJson = readJson(appTree, 'package.json');
 
-    expect(packageJson.devDependencies['@bitovi/eslint']).toBe('^1.0.0');
-    expect(packageJson.devDependencies['@bitovi/eslint-plugin-nx-glue']).toBe('^1.0.0');
+    // expect(packageJson.devDependencies['@bitovi/eslint']).toBe('^1.0.0');
+    // expect(packageJson.devDependencies['@bitovi/eslint-plugin-glue']).toBe('^1.0.0');
+    expect(packageJson.devDependencies['eslint-plugin-glue']).toBe('^0.3.0');
     expect(packageJson.devDependencies[existingDependency]).toBe(existingDependencyVersion);
 
-    expect(packageJson.dependencies['@bitovi/eslint']).toBeUndefined();
-    expect(packageJson.dependencies['@bitovi/eslint-plugin-nx-glue']).toBeUndefined();
+    // expect(packageJson.dependencies['@bitovi/eslint']).toBeUndefined();
+    // expect(packageJson.dependencies['@bitovi/eslint-plugin-glue']).toBeUndefined();
+    expect(packageJson.dependencies['eslint-plugin-glue']).toBeUndefined();
     expect(packageJson.dependencies[existingDependency]).toBe(existingDependencyVersion);
   });
 });

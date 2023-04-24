@@ -1,31 +1,25 @@
 import { readProjectConfiguration, Tree } from "@nrwl/devkit";
+import { join } from "path";
 import { RuleGeneratorSchema } from "../schema";
 
 export interface NormalizedSchema extends RuleGeneratorSchema {
   directory: string;
-  sourceRoot: string;
-  projectName: string | undefined;// Required for optional properties used in templates
+  index: string;
+  projectName: string;
 }
 
 export function normalizeOptions(tree: Tree, options: RuleGeneratorSchema): NormalizedSchema {
+  const projectConfig = readProjectConfiguration(tree, options.projectName);
+
+  const sourceRoot = projectConfig.sourceRoot ?? '';
+
+  const index = options.index ?? 'index.ts';
+  const directory = options.directory ?? 'rules';
+
   return {
     ...options,
-    sourceRoot: getSourceRoot(tree, options),
-    directory: options.directory ?? 'rules',
-    projectName: options.projectName
+    index: join(sourceRoot, index),
+    directory: join(sourceRoot, directory),
+    projectName: options.projectName,
   };
-}
-
-function getSourceRoot(tree: Tree, options: RuleGeneratorSchema): string {
-  const { sourceRoot, projectName } = options;
-
-  if (projectName) {
-    const projectConfig = readProjectConfiguration(tree, projectName);
-
-    if (projectConfig.sourceRoot) {
-      return projectConfig.sourceRoot;
-    }
-  }
-
-  return sourceRoot ?? '';
 }

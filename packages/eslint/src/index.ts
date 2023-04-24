@@ -1,3 +1,2 @@
-export { generateDocsForRules } from './executors/doc-gen/doc-gen';
-// export { main } from './bin/main';
-
+export { generateDocs } from './generate-docs';
+export { main } from './bin/main';

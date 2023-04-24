@@ -18,7 +18,7 @@ import { ESLintUtils, TSESTree, AST_NODE_TYPES, ASTUtils } from '@typescript-esl
 
 <% if(projectName) { %>
 // TODO: clean up "eslint-plugin" from projectName
-// NOTE: The rule will be available in ESLint configs as "@bitovi/nx-glue/<%= projectName %>/<%= fileName %>"
+// NOTE: The rule will be available in ESLint configs as "@bitovi/glue/<%= projectName %>/<%= fileName %>"
 <% } // end else block %>
 export const RULE_NAME = '<%= fileName %>';
 

@@ -1,0 +1,25 @@
+# <%= projectName %>
+
+TODO: update this
+npx bitlint init --dryRun
+npx bitlint plugin my-plugin --directory=my-plugin --dryRun
+npx bitlint rule my-rule --directory=my-plugin/src/rules --index=my-plugin/src/index.ts --dryRun
+
+npx tsc --project=my-plugin/tsconfig.lint.json
+
+cp my-plugin/package.json dist/out-tsc/ && cp my-plugin/README.md dist/out-tsc/
+
+cd dist/out-tsc && npm publish
+
+npx jest --config=my-plugin/jest.config.ts
+
+
+This library was generated with [Nx](https://nx.dev).
+
+## Running unit tests
+
+Run `nx test <%= projectName %>` to execute the unit tests via [Jest](https://jestjs.io).
+
+## Running lint
+
+Run `nx lint <%= projectName %>` to execute the lint via [ESLint](https://eslint.org/).
