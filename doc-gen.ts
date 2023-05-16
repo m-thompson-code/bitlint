@@ -398,7 +398,7 @@ function normalizeMarkdownText(text: string): string {
 // -----
 
 const rulesInfo = gatherRuleFileInfo(
-  // TODO: un-hardcode rules source path
+  // TODO: update to allow for multiple paths
   INPUT_PATH
 );
 
